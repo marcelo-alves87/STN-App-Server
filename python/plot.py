@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import style
@@ -52,7 +53,7 @@ minx, maxx = input_file_csv(str(sys.argv[1]))
 plt.xticks(np.arange(minx, maxx,step=0.3))
 plt.xlabel('Metros (m)')
 plt.ylabel('VSWR')
-plt.title('Análise de Haste de Âncora')
+#plt.title('AnÃ¡lise de Haste de Ã‚ncora')
 plt.grid()
 #plt.show()
 plt.savefig(os.path.dirname(os.path.abspath(__file__)) + '/' + str(sys.argv[1]) + '.png')

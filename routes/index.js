@@ -74,7 +74,8 @@ function execPython2(fileName, res) {
           console.error('exec error:' + error);
           return;
         }
-        res.json({'print' : base64_encode(fileName + '.png') });
+        res.json({'print' : base64_encode(fileName + '.png')});
+       
         setTimeout(unlinkSyncFile, 1000, fileName);    
         setTimeout(unlinkSyncFile, 2000, fileName + '.png');
             
@@ -102,8 +103,8 @@ function processEncodedFile(fileEncoded, res) {
         if(err) {
             console.log(err);
         } else {
-            setTimeout(execPython, 1000, fileName, res);
-            //setTimeout(execPython2, 1000, fileName, res);
+            //setTimeout(execPython, 1000, fileName, res);
+            setTimeout(execPython2, 1000, fileName, res);
         }
     });
 }
@@ -115,7 +116,7 @@ function base64_encode(fileName) {
         // read binary data
         var bitmap = fs.readFileSync(path1);
         // convert binary data to base64 encoded string
-        return new Buffer(bitmap).toString('base64');
+        return Buffer.from(bitmap).toString('base64');
     }    
 }
 
