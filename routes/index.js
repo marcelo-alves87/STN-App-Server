@@ -5,6 +5,7 @@ var router = express.Router();
 var path = require("path");
 var exec = require("child_process").exec;
 const UPLOAD_PATH = '../python/';
+var uuid = require('uuid')
 
 var store = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -74,6 +75,7 @@ function execPython2(fileName, res) {
           console.error('exec error:' + error);
           return;
         }
+       
         res.json({'print' : base64_encode(fileName + '.png')});
        
         setTimeout(unlinkSyncFile, 1000, fileName);    
@@ -98,7 +100,7 @@ function execPython2(fileName, res) {
 
 function processEncodedFile(fileEncoded, res) {
     fileEncoded = fileEncoded.replace('data:application/vnd.ms-excel;base64,', '');
-    fileName = 'out.csv';
+    fileName = uuid.v4().toString() + '.csv';
     fs.writeFile('python/' + fileName, fileEncoded, 'base64', function(err) {
         if(err) {
             console.log(err);
