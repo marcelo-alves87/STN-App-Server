@@ -40,33 +40,17 @@ function unlinkSyncFile(fileName) {
     }
 }
 
-function execPython(fileName, res) {
+function execPython(fileName, res, basename) {
     //STN - MED02mWorkshop - R.04.2019 - RNA.1001.14.1
     //STN - MEDExpUFPEWorkshop - R.03.2019 - RNA.1001.14.1
-    exec('python ./python/"STN - MED02mWorkshop - R.04.2019 - RNA.1001.14.1".py ' + '"' + fileName + '"', (error, stdout, stderr) => {
+    exec('python ./python/' + '"' + basename + '.py" ' + '"' + fileName + '"', (error, stdout, stderr) => {
         if (error) {
           console.error('exec error:' + error);
           return;
         }
-        res.json({'print' : stdout });
-            
+        res.json({'print' : stdout });            
         setTimeout(unlinkSyncFile, 1000, fileName);
-            
-            // fs.readFile(path.resolve(__dirname, UPLOAD_PATH, fileName + '.png'), function (err, content) {
-            //     if (err) {
-            //         res.writeHead(400, {'Content-type':'text/html'})
-            //         console.log(err);
-            //         res.end("No such image");    
-            //     } else {
-            //         //specify the content type in the response will be an image
-            //         res.contentType('image/jpeg');
-            //         res.send(content);
-            //         setTimeout(unlinkSyncFile, 1000, path.resolve(__dirname, UPLOAD_PATH, fileName + '.png'));
-            //     }
-            // });
-            
-        
-      });
+    });
 }
 
 function execPython2(fileName, res) {
@@ -76,37 +60,29 @@ function execPython2(fileName, res) {
           return;
         }
        
-        res.json({'print' : base64_encode(fileName + '.png')});
+        res.json({'image' : base64_encode(fileName + '.png')});
        
         setTimeout(unlinkSyncFile, 1000, fileName);    
         setTimeout(unlinkSyncFile, 2000, fileName + '.png');
-            
-            // fs.readFile(path.resolve(__dirname, UPLOAD_PATH, fileName + '.png'), function (err, content) {
-            //     if (err) {
-            //         res.writeHead(400, {'Content-type':'text/html'})
-            //         console.log(err);
-            //         res.end("No such image");    
-            //     } else {
-            //         //specify the content type in the response will be an image
-            //         res.contentType('image/jpeg');
-            //         res.send(content);
-            //         setTimeout(unlinkSyncFile, 1000, path.resolve(__dirname, UPLOAD_PATH, fileName + '.png'));
-            //     }
-            // });
-            
-        
+     
       });
 }
 
-function processEncodedFile(fileEncoded, res) {
+function processEncodedFile(fileEncoded, res, typeProcess) {
     fileEncoded = fileEncoded.replace('data:application/vnd.ms-excel;base64,', '');
+    fileEncoded = fileEncoded.replace('data:text/comma-separated-values;base64,', '');
     fileName = uuid.v4().toString() + '.csv';
     fs.writeFile('python/' + fileName, fileEncoded, 'base64', function(err) {
         if(err) {
             console.log(err);
         } else {
-            //setTimeout(execPython, 1000, fileName, res);
-            setTimeout(execPython2, 1000, fileName, res);
+            if(typeProcess == 0) {
+                setTimeout(execPython, 1000, fileName, res, 'STN - MED02mWorkshop - R.04.2019 - RNA.1001.14.1');
+            } else if (typeProcess == 1) {
+                setTimeout(execPython, 1000, fileName, res, 'STN - MEDExpUFPEWorkshop - R.03.2019 - RNA.1001.14.1');
+            } else if(typeProcess == 2) {
+                setTimeout(execPython2, 1000, fileName, res);
+            }
         }
     });
 }
@@ -123,9 +99,7 @@ function base64_encode(fileName) {
 }
 
 router.post('/fileProcess', function(req,res) {
-    fileEncoded = JSON.stringify(req.body);
-    processEncodedFile(fileEncoded, res);   
-      
+  processEncodedFile(JSON.stringify(req.body.fileName), res, req.body.typeProcess);
 });
 
 module.exports = router;
