@@ -12,8 +12,8 @@ style.use('dark_background')
 
 def input_file_csv(type1):
    x,y = normalize_csv(os.path.dirname(os.path.abspath(__file__)) + '/' + type1)
-   x = x[5:101]
-   y = y[5:101]
+   x = x[19:101]
+   y = y[19:101]
    plt.plot(x,y,c='y')
    return min(x), max(x)
 
