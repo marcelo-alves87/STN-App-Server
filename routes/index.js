@@ -99,7 +99,138 @@ function base64_encode(fileName) {
 }
 
 router.post('/fileProcess', function(req,res) {
-  processEncodedFile(JSON.stringify(req.body.fileName), res, req.body.typeProcess);
+//   processEncodedFile(JSON.stringify(req.body.fileName), res, req.body.typeProcess);
+
+    // 1 - Checar conexao com o instrumento
+
+    // 2 - Calibrar o instrumento de forma eletronica, dado o arquivo de calibracao
+
+    // 3 - Pegar o arquivo do instrumento e salva lo com Pi.csv
+
+    // 4 - Usar Convert to Model para gerar a entrada da rede neural
+
+    setTimeout(execPython_Conversion, 1000, res);
+    
+
+    // 5 - Executar a rede como parametro o model da etapa anterior
+    
+
+    // 6 - gerar o relatorio
+
+
+   //res.json({'print' : 1 });
 });
+
+function execPython_Conversion(res) {
+  
+    exec('python3 ./python/ConvertToModel.py', (error, stdout, stderr) => {
+        if (error) {
+          console.log('Erro:')
+          console.error(error);
+        } else {
+          
+          setTimeout(execPython_RNN, 1000, res); 
+        }
+    });
+
+    
+}
+
+function execPython_RNN(res) {
+  
+    exec('python3 ./python/Workshop.py', (error, stdout, stderr) => {
+        if (error) {
+          console.log('Erro:')
+          console.error(error);
+        } else {
+            console.log(4);
+            setTimeout(getMeanModeFromRNN, 1000, stdout, res);
+          
+        }
+    });
+}
+
+            
+function getMeanModeFromRNN(stdout, res) {
+    param1 = JSON.parse(stdout);
+
+    exec('python3 ./python/GetMeanMode.py ' + param1, (error, stdout, stderr) => {
+        if (error) {
+          console.log('Erro:')
+          console.error(error);
+        } else {
+          stdout.replace('[','');
+          stdout.replace(']','');
+          stdout.replace('(','');
+          stdout.replace(')','');  
+          res.json(stdout);
+        }
+    });
+}
+
+router.post('/checkConnectionAndCalibrationStatus', function(req,res){
+    /*
+    0 - Sem conexao, 1 - Sem calibracao, 2 - Calibracao encontrada, e retornar a data da calibracao
+    */
+    
+   checkConnection(res);
+
+   
+    /* if(data1 == 0) {
+        res.json({'status' : 0});
+    } else {
+        data1 = setTimeout(checkCalibrationStatus, timeout1);
+        console.log(data1);
+    } */
+
+  
+
+    
+    
+});
+
+function checkCalibrationStatus(res) {
+
+    exec('python ./python/CheckCalibration.py', (error, stdout, stderr) => {
+        if (error) {
+          console.error(error);
+        } 
+        else if(stderr) {
+          console.log(stderr)  
+        }
+        else {         
+          if(stdout.trim() === 'erro') {
+            res.json({'status' : 1});
+          } else {  
+            res.json({'status' : 2, 'date': stdout.trim()})
+          }
+        }
+    });
+
+}
+
+function checkConnection(res) {
+
+
+    exec('python ./python/CheckConnection.py', (error, stdout, stderr) => {
+        if (error) {
+          console.error(error);
+        } 
+        else if(stderr) {
+          console.log(stderr)  
+        }
+        else {
+          //console.log(stdout)
+          if(stdout.trim() === 'erro') {
+            res.json({'status' : 0})
+          } else {
+            checkCalibrationStatus(res);
+           }
+        }
+    });
+}
+
+   
+
 
 module.exports = router;

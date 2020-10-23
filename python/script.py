@@ -1,1 +1,0 @@
-print('Haste sem desgaste')
