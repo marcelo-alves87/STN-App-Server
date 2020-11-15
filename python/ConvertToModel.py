@@ -1,11 +1,13 @@
 import numpy as np
 import csv
 import xlsxwriter
+import pdb
 
 def convert_to_mhz(data):
     return data / 10 ** 6
 
 def normalize_csv(filename,param1, param2):
+    
     xs = []
     ys = []
     end_index = 0
@@ -22,7 +24,8 @@ def normalize_csv(filename,param1, param2):
                else:
                    xs = []
                    ys = []               
-            elif(s.find('!') < 0 and s.find('BEGIN') < 0 and s.find('END') < 0):
+            elif(s.find('!') < 0 and s.find('BEGIN') < 0 and s.find('END') < 0 and s.find('EN') < 0):
+                
                 xs.append(row[0])
                 if len(row) > 2:
                     #1 Real, 2 Imaginary
@@ -31,7 +34,7 @@ def normalize_csv(filename,param1, param2):
                     ys.append(row[1])
     return np.array(xs, dtype=np.float64), np.array(ys, dtype=np.float64)
 
-wb = xlsxwriter.Workbook(r'C:\Users\55819\Node_Projects\STN_Server\python\Pi.xlsx')
+wb = xlsxwriter.Workbook(r'/home/pi/Documents/STN_Server/python/Pi.xlsx')
 ws = wb.add_worksheet('Plan1')
 
 header_format = wb.add_format()
@@ -42,7 +45,7 @@ header_format.set_align('center')
 data_format = wb.add_format()
 data_format.set_align('center')
 #data_format.set_num_format('#0.#####0')
-path1 = r'C:\Users\55819\Node_Projects\STN_Server\python\Pi.csv'
+path1 = r'/home/pi/Documents/STN_Server/python/Pi.csv'
 for j in range(1,10):
     #S11
     x, y1 = normalize_csv(path1, 1, 1)
