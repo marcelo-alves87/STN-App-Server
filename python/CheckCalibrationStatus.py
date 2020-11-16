@@ -106,10 +106,10 @@ def GeraMatrizCorrelacoes(dataset, qde_medicoes):
 def ZeraMenoresCorrelacoes(matrizCorr, min_corr, qde_medicoes):
     #pdb.set_trace()
     matrizCorrZerada = np.copy(matrizCorr)
+    corr = 1
+    if matrizCorr[qde_medicoes -2][qde_medicoes -1] < min_corr:
+        corr = (matrizCorr[qde_medicoes -2][qde_medicoes -1])
     
-    for i in range(qde_medicoes - 1):
-        if (matrizCorr[i][i+1] < min_corr):
-            print(matrizCorr[i][i+1])            
     
     for i in range(qde_medicoes):
         for j in range (qde_medicoes):
@@ -117,7 +117,7 @@ def ZeraMenoresCorrelacoes(matrizCorr, min_corr, qde_medicoes):
                 matrizCorrZerada[i][j] = 0
                 
                 
-    return(matrizCorrZerada)    
+    return(matrizCorrZerada, corr)    
 
 def ListadeZeros(matrizCorrZerada, qde_medicoes):
     qdeZeros = []
@@ -201,37 +201,37 @@ def main_convert_to_xlsx(index1):
         #S11
         x, y1 = normalize_csv(path1, 1, 1)
 
-        for i, yi in enumerate(y1[:15]):
+        for i, yi in enumerate(y1):
             ws.write(0, i, convert_to_mhz(x[i]), header_format)
             ws.write(j, i, yi, data_format)
 
         #Phase
-#         x, y2 = normalize_csv(path1, 2, 1)
-# 
-#         for i, yi in enumerate(y2):
-#             ws.write(0, len(y1) + i, convert_to_mhz(x[i]), header_format)
-#             ws.write(j, len(y1) + i, yi, data_format)
-# 
+        x, y2 = normalize_csv(path1, 2, 1)
+
+        for i, yi in enumerate(y2):
+            ws.write(0, len(y1) + i, convert_to_mhz(x[i]), header_format)
+            ws.write(j, len(y1) + i, yi, data_format)
+
 #         #SWR
-#         x, y1 = normalize_csv(path1, 3, 1)
-# 
-#         for i, yi in enumerate(y1):
-#             ws.write(0, 2*len(y2) + i, convert_to_mhz(x[i]), header_format)
-#             ws.write(j, 2*len(y2) + i, yi, data_format)
+        x, y1 = normalize_csv(path1, 3, 1)
+
+        for i, yi in enumerate(y1):
+            ws.write(0, 2*len(y2) + i, convert_to_mhz(x[i]), header_format)
+            ws.write(j, 2*len(y2) + i, yi, data_format)
 #             
 #         #Real
-#         x, y2 = normalize_csv(path1, 4, 1)
-# 
-#         for i, yi in enumerate(y2):
-#             ws.write(0, 3*len(y1) + i, convert_to_mhz(x[i]), header_format)
-#             ws.write(j, 3*len(y1) + i, yi, data_format)
+        x, y2 = normalize_csv(path1, 4, 1)
+
+        for i, yi in enumerate(y2):
+            ws.write(0, 3*len(y1) + i, convert_to_mhz(x[i]), header_format)
+            ws.write(j, 3*len(y1) + i, yi, data_format)
 # 
 #         #Img
-#         x, y1 = normalize_csv(path1, 4, 2)
-# 
-#         for i, yi in enumerate(y1):
-#             ws.write(0, 4*len(y2) + i, convert_to_mhz(x[i]), header_format)
-#             ws.write(j, 4*len(y2) + i, yi, data_format)
+        x, y1 = normalize_csv(path1, 4, 2)
+
+        for i, yi in enumerate(y1):
+            ws.write(0, 4*len(y2) + i, convert_to_mhz(x[i]), header_format)
+            ws.write(j, 4*len(y2) + i, yi, data_format)
               
 #         ws.write(j, 5*len(y2), ' ')
 #         ws.write(j, 5*len(y2) + 1,  0, data_format)
@@ -249,24 +249,38 @@ def main_corr(index1):
     
    
     if index1 == 1:
-        main_convert_to_xlsx(1)
+        #main_convert_to_xlsx(1)
         print(0)
     else:    
         #/home/pi/Documents/STN_Server/python/Pi'+ str(i) +'.csv'
         
         if os.path.isfile('/home/pi/Documents/STN_Server/python/Pi1.xlsx') == True:
             dataset, qde_medicoes, qde_parametros = ColetaPrimeiraMedição('/home/pi/Documents/STN_Server/python/Pi1.xlsx')  
-            main_convert_to_xlsx(index1)
+            #main_convert_to_xlsx(index1)
             for i in range(1, index1):                
                 if os.path.isfile('/home/pi/Documents/STN_Server/python/Pi' + str(i+1) + '.xlsx') == True:
                     dataset, qde_medicoes, qde_parametros = ColetaNovaMedição('/home/pi/Documents/STN_Server/python/Pi' + str(i+1) + '.xlsx', dataset)
                 else:
                     print('erro')
                     sys.exit()
+            
             matrizCorr = GeraMatrizCorrelacoes(dataset, qde_medicoes)    
-            matrizCorrZerada = ZeraMenoresCorrelacoes(matrizCorr, min_corr, qde_medicoes)
+            matrizCorrZerada, corr = ZeraMenoresCorrelacoes(matrizCorr, min_corr, qde_medicoes)
             qdeZeros = ListadeZeros(matrizCorrZerada, qde_medicoes)
             
+            if qde_medicoes > n_samples:
+                qdeZerosTemp = qdeZeros[:]
+                for i in range(len(qdeZeros)):
+                    if(sum(qdeZerosTemp) == 0):
+                        break
+                    else:
+                        #pdb.set_trace()
+                        indicePiorMedicao = qdeZeros.index(max(qdeZerosTemp))
+                        matrizLimpaTemp = np.delete(matrizCorrZerada, indicePiorMedicao, axis = 0)
+                        matrizLimpaTemp = np.delete(matrizLimpaTemp, indicePiorMedicao, axis = 1)
+                        qdeZerosTemp = ListadeZeros(matrizLimpaTemp, matrizLimpaTemp.shape[0])
+                qdeZeros = qdeZerosTemp
+                
             qdeMedValidas = 0    
             for elemento in qdeZeros:
                 if (elemento == 0):
@@ -274,30 +288,33 @@ def main_corr(index1):
                     
             qdeMedRealizadas = index1
             if qdeMedValidas < n_samples and qdeMedRealizadas < qdeMaximaMedicoes:
-               print(0)
+                if corr >= min_corr:
+                    print(0)
+                else:
+                    print(corr)
             elif qdeMedValidas >= n_samples and qdeMedRealizadas < qdeMaximaMedicoes:
                 #novaMedicao = input("Ainda não há medições válidas. Carregue a próxima medição\n")
                 #dataset, qde_medicoes, qde_parametros = ColetaNovaMedição(novaMedicao, dataset)
                 #qdeMedRealizadas += 1
                 
-                matrizCorr = GeraMatrizCorrelacoes(dataset, qde_medicoes)    
-                matrizCorrZerada = ZeraMenoresCorrelacoes(matrizCorr, min_corr, qde_medicoes)
-                qdeZeros = ListadeZeros(matrizCorrZerada, qde_medicoes)
+                #matrizCorr = GeraMatrizCorrelacoes(dataset, qde_medicoes)    
+                #matrizCorrZerada = ZeraMenoresCorrelacoes(matrizCorr, min_corr, qde_medicoes)
+                #qdeZeros = ListadeZeros(matrizCorrZerada, qde_medicoes)
                 
-                qdeZerosTemp = qdeZeros[:]
-                for i in range(len(qdeZeros)):
-                    if(sum(qdeZerosTemp) == 0):
-                        break
-                    else:                        
-                        indicePiorMedicao = qdeZeros.index(max(qdeZerosTemp))
-                        matrizLimpaTemp = np.delete(matrizCorrZerada, indicePiorMedicao, axis = 0)
-                        matrizLimpaTemp = np.delete(matrizLimpaTemp, indicePiorMedicao, axis = 1)
-                        qdeZerosTemp = ListadeZeros(matrizLimpaTemp, matrizLimpaTemp.shape[0])
-                    
-                qdeMedValidas = 0    
-                for elemento in qdeZerosTemp:
-                    if (elemento == 0):
-                        qdeMedValidas += 1
+                #qdeZerosTemp = qdeZeros[:]
+#                 for i in range(len(qdeZeros)):
+#                     if(sum(qdeZerosTemp) == 0):
+#                         break
+#                     else:                        
+#                         indicePiorMedicao = qdeZeros.index(max(qdeZerosTemp))
+#                         matrizLimpaTemp = np.delete(matrizCorrZerada, indicePiorMedicao, axis = 0)
+#                         matrizLimpaTemp = np.delete(matrizLimpaTemp, indicePiorMedicao, axis = 1)
+#                         qdeZerosTemp = ListadeZeros(matrizLimpaTemp, matrizLimpaTemp.shape[0])
+#                     
+#                 qdeMedValidas = 0    
+#                 for elemento in qdeZerosTemp:
+#                     if (elemento == 0):
+#                         qdeMedValidas += 1
             
                 if (qdeMedValidas >= n_samples):
                     print(1)

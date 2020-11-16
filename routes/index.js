@@ -253,22 +253,27 @@ function convertDataToXlsx(res) {
 }
 
 function execPython_RNN(res) {
-  
+    
     exec('python3 /home/pi/Documents/STN_Server/python/Workshop.py', (error, stdout, stderr) => {
         if (error) {
           console.log('Erro:')
           console.error(error);
         } else {
-            if(stdout) {
-                getMeanMode(stdout, res)
+           res.json({'data1' : stdout})     
+           /*fs.readFile('/home/pi/Documents/STN_Server/python/Workshop.txt', function(err,data){
+                if (!err) {
+                    //console.log('received data: ' + data);
+                    res.json({'data' : data});
+                } else {
+                    console.log(err);
+                }
+            });*/
                 
-            } else if (stderr) {
-                console.log(stderr)
-                res.json({'data' : 0});
-
-            }
+                
+                
+        } 
             
-        }
+        
     });
 }
 
@@ -337,6 +342,7 @@ function extractDataFromVNA_Corr(input_argv, res) {
           console.log('Erro:');
           console.error(error);
         } else if (stderr) {
+           console.log(stderr) 
            res.json({'data' : -1}); 
         } else {
             console.log(stdout)
