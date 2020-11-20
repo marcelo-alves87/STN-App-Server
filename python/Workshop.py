@@ -14,8 +14,20 @@ Criado Terça-feira, 13 de Outubro de 2020
 # Programa para uso da Feedforward Artificial Neural Network - FF-ANN
 # na detecção de falhas nas hastes de âncora de 06m com RNA pre Treinada.
 #------------------------------------------------------------------------------
+import pandas as pd
+import numpy as np
+from keras.models import load_model
+#    from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score, f1_score
 
-def CarregaRNA_Testa_Ancora(arquivo, stats = '/home/pi/Documents/STN_Server/python/Means_Variances.xls', classificador = '/home/pi/Documents/STN_Server/python/classifier.json', pesos = '/home/pi/Documents/STN_Server/python/model_weights.h5'):
+def scale_data(array,means,stds):
+    return (array-means)/stds
+
+def save_predict(predict):
+    new_file = open('/home/pi/Documents/STN_Server/python/Workshop.txt', 'w+')
+    new_file.write(predict)    
+    new_file.close()
+
+def CarregaRNA_Testa_Ancora(arquivo, stats = '/home/pi/Documents/STN_Server/python/Means_Variances.xls', classificador = '/home/pi/Documents/STN_Server/python/classifier.json', pesos = 'model_weights.h5'):
     '''
     ### Função para classificação de hastes do Campo Experimental UFPE ###
     
@@ -26,19 +38,15 @@ def CarregaRNA_Testa_Ancora(arquivo, stats = '/home/pi/Documents/STN_Server/pyth
     'Means_Variances.xls'; 'classifier.json', 'model_weights.h5'
 
     '''
-    import pandas as pd
-    import numpy as np
-    from keras.models import load_model
-#    from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score, f1_score
     
-    def scale_data(array,means,stds):
-        return (array-means)/stds
+    
+     
         
     #Variável de Saída
     Status = []
     # Importando base de dados
     dataset = pd.read_excel(arquivo)
-    ModS11 = dataset.iloc[:,:15].values
+    ModS11 = dataset.iloc[:,:1001].values
 #    FasS11 = dataset.iloc[:,1001:2002].values
 #    ReZin = dataset.iloc[:,2002:3003].values
 #    ImZin = dataset.iloc[:,3003:4004].values
@@ -46,7 +54,7 @@ def CarregaRNA_Testa_Ancora(arquivo, stats = '/home/pi/Documents/STN_Server/pyth
     
     #Selecionando o parâmetro
     X_detect = ModS11
-    y_true = dataset.iloc[:, 5006].values
+    y_true = dataset.iloc[:, 5004].values
 
     #Carregando Estatísticas
     estatisticas = pd.read_excel(stats)
@@ -65,12 +73,12 @@ def CarregaRNA_Testa_Ancora(arquivo, stats = '/home/pi/Documents/STN_Server/pyth
     #loaded_model
   
     # Fazendo a classificação dos dados de entrada
-    y_detect = loaded_model.predict(X_detect_norm)
-    y_detect = (y_detect > 0.5)
-    y_detect = np.int64(y_detect)
-    y_detect = y_detect.reshape((-1,))
+    y_detect_value = loaded_model.predict(X_detect_norm)
+    #y_detect = (y_detect > 0.5)
+    #y_detect = np.int64(y_detect)
+    #y_detect = y_detect.reshape((-1,))
     
-   
+    print(y_detect_value[0][0])   
 #    #Associando o Status
 #    for i in range(len(y_detect)):
 #        if y_detect[i] == 0:
@@ -91,10 +99,10 @@ def CarregaRNA_Testa_Ancora(arquivo, stats = '/home/pi/Documents/STN_Server/pyth
 #    print("Recall = " + str(round(100*recall_score(y_true, y_detect),2))+"%")
 #    print("")
 #    print(cm)
+     
+    #retornando o resultado
     
-    #retornando o resultado   
-    return(y_detect)
     
-
     
-print(CarregaRNA_Testa_Ancora('/home/pi/Documents/STN_Server/python/Pi.xlsx')) 
+    
+CarregaRNA_Testa_Ancora('/home/pi/Documents/STN_Server/python/Pi.xlsx') 

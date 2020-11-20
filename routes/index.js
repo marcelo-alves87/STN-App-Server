@@ -352,14 +352,14 @@ function extractDataFromVNA_Corr(input_argv, res) {
             } else if(stdout.trim()==='0') {
                //corr necessita de mais medicoes  
                res.json({'data' : 0}) ; 
-            } else if(stdout.trim==='semCorrelacao') {
+            } else if(stdout.trim()==='semCorrelacao') {
                //medicoes sem corr  
                res.json({'data' : 1}) ;
             } else {
                corr = parseFloat(stdout)
                if(corr == 1) {
                     // corr sucesso
-                    res.json({'data' : 2});
+                    res.json({'data' : 2, 'corr' : corr});
                } else {
                     res.json({'data' : 3, 'corr' : corr});
                }

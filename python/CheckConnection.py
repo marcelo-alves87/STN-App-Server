@@ -1,7 +1,7 @@
 import pyvisa as visa
 import time
 
-ADDRESS = '169.254.120.255'
+ADDRESS = '192.168.0.173'
 
 def write_command(device, command, retry=True):
     try:
