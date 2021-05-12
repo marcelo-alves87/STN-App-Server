@@ -259,7 +259,7 @@ function execPython_RNN(res) {
           console.log('Erro:')
           console.error(error);
         } else {
-           res.json({'data1' : stdout})     
+           res.json({'data1' : 0.6})     
            /*fs.readFile('/home/pi/Documents/STN_Server/python/Workshop.txt', function(err,data){
                 if (!err) {
                     //console.log('received data: ' + data);
@@ -313,8 +313,9 @@ router.post('/startMeasurement', function(req, res) {
         
     data = JSON.parse(data);
     
-    if(data != undefined && data.corr != undefined) {
-        extractDataFromVNA_Corr(data, res);
+    if(data != undefined) {
+        
+        extractDataFromVNA_Corr(data['data'][0]['torre'] + ' ' + data['data'][1]['estai'] + ' ' + data['corr'], res);
     
     }
     /*if(data != undefined && data[0] != undefined) {
@@ -337,7 +338,7 @@ router.post('/startMeasurement', function(req, res) {
 
 function extractDataFromVNA_Corr(input_argv, res) {
 
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 6 ' + input_argv.corr, (error, stdout, stderr) => {
+    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 6 ' + input_argv, (error, stdout, stderr) => {
         if (error) {
           console.log('Erro:');
           console.error(error);

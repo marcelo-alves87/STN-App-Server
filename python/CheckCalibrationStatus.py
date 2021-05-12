@@ -78,23 +78,21 @@ def extract_data(device):
     except:    
         print('5.0')
         
-def extract_data_corr(device, i):
-        #device.write('*rst;*cls')
-        #device.write(':MMEMory:LOAD:STATe "%s"' % ('CEXP3.sta'))
-        #device.write('*OPC')
+def extract_data_corr(device, torre, estai, i):
+        
         time.sleep(1)
-        device.write(':MMEMory:STORe:FDATA "%s"' % ('Pi.csv'))
+        device.write(':MMEMory:STORe:FDATA "%s"' % ('Pi2.csv'))
         device.write('*OPC')
         time.sleep(1)
-        filedata = device.query_binary_values(':MMEMory:DATA? "%s"' % ('Pi.csv'))
+        filedata = device.query_binary_values(':MMEMory:DATA? "%s"' % ('Pi2.csv'))
         
         new_file = open('/home/pi/Documents/STN_Server/python/Pi'+ str(i) +'.csv', 'wb')
         for fl in filedata:
             new_file.write(bytearray(struct.pack('f', fl)))    
-            
+        
         new_file.close()
         main_convert_to_xlsx(i)
-        main_corr(i)
+        main_corr(i, torre, estai)
         
         
 def GeraMatrizCorrelacoes(dataset, qde_medicoes):
@@ -203,7 +201,7 @@ def main_convert_to_xlsx(index1):
     data_format = wb.add_format()
     data_format.set_align('center')
     #data_format.set_num_format('#0.#####0')
-    path1 = r'/media/pi/Documents/STN_Server/python/Pi' + str(index1) + '.csv'
+    path1 = r'/home/pi/Documents/STN_Server/python/Pi' + str(index1) + '.csv'
     #path1 = r'/media/pi/My Passport/Hastes/' + haste + '/' + 'Med' + str(index1) + '_' + haste + '.csv' 
     for j in range(1,2):
         #S11
@@ -214,11 +212,11 @@ def main_convert_to_xlsx(index1):
             ws.write(j, i, yi, data_format)
 
         #Phase
-#         x, y2 = normalize_csv(path1, 2, 1)
-# 
-#         for i, yi in enumerate(y2):
-#             ws.write(0, len(y1) + i, convert_to_mhz(x[i]), header_format)
-#             ws.write(j, len(y1) + i, yi, data_format)
+# #         x, y2 = normalize_csv(path1, 2, 1)
+# # 
+# #         for i, yi in enumerate(y2):
+# #             ws.write(0, len(y1) + i, convert_to_mhz(x[i]), header_format)
+# #             ws.write(j, len(y1) + i, yi, data_format)
 
 #         #SWR
 #         x, y1 = normalize_csv(path1, 3, 1)
@@ -246,9 +244,9 @@ def main_convert_to_xlsx(index1):
 #         ws.write(j, 5*len(y2) + 2, '1A', header_format)
 
     wb.close()
-    main_convert_to_xlsx_(index1, haste)
+    main_convert_to_xlsx_(index1)
     
-def main_convert_to_xlsx_(index1, haste):
+def main_convert_to_xlsx_(index1):
     #pdb.set_trace()
     
     xlsx_default = r'/home/pi/Documents/STN_Server/python/Pi.xlsx'
@@ -268,42 +266,42 @@ def main_convert_to_xlsx_(index1, haste):
     data_format = wb.add_format()
     data_format.set_align('center')
     #data_format.set_num_format('#0.#####0')
-    path1 = r'/media/pi/My Passport/Hastes/' + haste + '/' + 'Med' + str(index1) + '_' + haste + '.csv' 
-    for j in range(1,2):
+    path1 = r'/home/pi/Documents/STN_Server/python/Pi' + str(index1) + '.csv' 
+    for j in range(1,2): 
         #S11
         x, y1 = normalize_csv(path1, 1, 1)
 
-        for i, yi in enumerate(y1):
+        for i, yi in enumerate(y1[:15]):
             ws.write(0, i, convert_to_mhz(x[i]), header_format)
             ws.write(j, i, yi, data_format)
 
         #Phase
-        x, y2 = normalize_csv(path1, 2, 1)
-
-        for i, yi in enumerate(y2):
-            ws.write(0, len(y1) + i, convert_to_mhz(x[i]), header_format)
-            ws.write(j, len(y1) + i, yi, data_format)
-
-#         #SWR
-        x, y1 = normalize_csv(path1, 3, 1)
-
-        for i, yi in enumerate(y1):
-            ws.write(0, 2*len(y2) + i, convert_to_mhz(x[i]), header_format)
-            ws.write(j, 2*len(y2) + i, yi, data_format)
-#             
-#         #Real
-        x, y2 = normalize_csv(path1, 4, 1)
-
-        for i, yi in enumerate(y2):
-            ws.write(0, 3*len(y1) + i, convert_to_mhz(x[i]), header_format)
-            ws.write(j, 3*len(y1) + i, yi, data_format)
+#         x, y2 = normalize_csv(path1, 2, 1)
 # 
-#         #Img
-        x, y1 = normalize_csv(path1, 4, 2)
-
-        for i, yi in enumerate(y1):
-            ws.write(0, 4*len(y2) + i, convert_to_mhz(x[i]), header_format)
-            ws.write(j, 4*len(y2) + i, yi, data_format)
+#         for i, yi in enumerate(y2):
+#             ws.write(0, len(y1) + i, convert_to_mhz(x[i]), header_format)
+#             ws.write(j, len(y1) + i, yi, data_format)
+# 
+# #         #SWR
+#         x, y1 = normalize_csv(path1, 3, 1)
+# 
+#         for i, yi in enumerate(y1):
+#             ws.write(0, 2*len(y2) + i, convert_to_mhz(x[i]), header_format)
+#             ws.write(j, 2*len(y2) + i, yi, data_format)
+# #             
+# #         #Real
+#         x, y2 = normalize_csv(path1, 4, 1)
+# 
+#         for i, yi in enumerate(y2):
+#             ws.write(0, 3*len(y1) + i, convert_to_mhz(x[i]), header_format)
+#             ws.write(j, 3*len(y1) + i, yi, data_format)
+# # 
+# #         #Img
+#         x, y1 = normalize_csv(path1, 4, 2)
+# 
+#         for i, yi in enumerate(y1):
+#             ws.write(0, 4*len(y2) + i, convert_to_mhz(x[i]), header_format)
+#             ws.write(j, 4*len(y2) + i, yi, data_format)
               
 #         ws.write(j, 5*len(y2), ' ')
 #         ws.write(j, 5*len(y2) + 1,  0, data_format)
@@ -329,13 +327,21 @@ def corr_med_samples(n_samples, min_corr):
     qdeMedRealizadas = n_samples
     return qdeMedValidas, qdeMedRealizadas, corr
 
-def check_corr(n_samples, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, corr):
+def save_usb_corr(index1, torre, estai, corr):
+    #pdb.set_trace()
+    device.write(':MMEMory:MOVE "%s","%s"' % ('Pi2.csv', '[USBDISK]:' +  torre + '_' + estai + '_' + str(index1) + '_' + str(round(corr, 2)) + '.csv'))
+    #device.write(':MMEMory:MOVE "%s"' % ('Pi'+ str(index1) + '.csv','[USBDISK]:' + torre + '_' + estai + '_' + str(index1) + '_' + str(round(corr, 2)) + '.csv'))
+
+def check_corr(n_samples, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, corr, torre, estai, index1):
     if qdeMedValidas < n_samples and qdeMedRealizadas < qdeMaximaMedicoes:
         print(corr)
+        save_usb_corr(index1, torre, estai, corr)
     elif (qdeMedValidas >= n_samples):
         print(corr)
+        save_usb_corr(index1, torre, estai, corr)
     elif qdeMedRealizadas >= qdeMaximaMedicoes:
         print('semCorrelacao')
+        #save_usb_corr(index1, torre, estai, corr)
 
 def corr_med_other_samples(index1, min_corr):
     dataset, qde_medicoes, qde_parametros = ColetaPrimeiraMedição('/home/pi/Documents/STN_Server/python/Pi1.xlsx')  
@@ -370,32 +376,41 @@ def corr_med_other_samples(index1, min_corr):
 #    print(qdeMedValidas)
     return qdeMedValidas, qdeMedRealizadas, corr
 
-def main_corr(index1):
+def main_corr(index1, torre, estai):
     #pdb.set_trace()
     n_samples = 3 #Quantidade de amostras válidas desejada
     min_corr = 0.95
-    qdeMaximaMedicoes = 6
+    qdeMaximaMedicoes = 7
     index1 = int(index1)
     
    
     if index1 < n_samples:
         print(0)
+        save_usb_corr(index1, torre, estai, 0)
     elif index1 == n_samples:    
         qdeMedValidas, qdeMedRealizadas, corr = corr_med_samples(n_samples, min_corr)
-        check_corr(n_samples, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, corr)
+        check_corr(n_samples, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, corr, torre, estai, index1)
     elif index1 > n_samples:          
         qdeMedValidas,qdeMedRealizadas, corr = corr_med_other_samples(index1, min_corr)
-        check_corr(index1, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, corr)
+        check_corr(index1, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, corr, torre, estai, index1)
         
 try:         
     rm = visa.ResourceManager()
     device = rm.open_resource('TCPIP0::' + ADDRESS + '::inst0::INSTR')
-    input1 = '-1'
-    input2 = '-1'
+    input1 = '-1' # comando
+    input2 = '-1' # torre
+    input3 = '-1' # estai
+    input4 = '-1'# corr
+    
     if len(os.sys.argv) > 1:
         input1 = os.sys.argv[1]
     if len(os.sys.argv) > 2:   
         input2 = os.sys.argv[2]
+    if len(os.sys.argv) > 3:   
+        input3 = os.sys.argv[3]
+    if len(os.sys.argv) > 4:   
+        input4 = os.sys.argv[4]
+      
 
     if input1 == '0':
         initial_cal_and_open(device)
@@ -412,7 +427,7 @@ try:
     elif input1 == '5':
         extract_data(device)
     elif input1 == '6':
-        extract_data_corr(device, input2)
+        extract_data_corr(device, input2, input3, input4)
     #Teste Workshop    
     elif input1 == '7':
         main_convert_to_xlsx_()    
