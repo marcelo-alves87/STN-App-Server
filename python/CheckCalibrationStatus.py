@@ -12,7 +12,10 @@ import pdb
 import traceback
 import shutil
 
-ADDRESS = '192.168.0.173'
+ADDRESS = '192.168.1.111'
+
+f_path = '/home/pi/Documents/STN_Server_branch/STN-App-Server/python/'
+r_path = r'/home/pi/Documents/STN_Server_branch/STN-App-Server/python/'
 
 def initial_cal_and_open(device):
     temp_values = device.query_ascii_values(':SENSe:CORRection:COLLect:GUIDed:SCOunt?')
@@ -36,12 +39,12 @@ def save_cal(device):
     data = device.query_binary_values(':MMEMory:DATA? "%s"' % ('Pi.sta'),'B',False)
     #device.write('*RST')
         
-    new_file = open('/home/pi/Documents/STN_Server/python/Pi.sta', "w+")
+    new_file = open(f_path + 'Pi.sta', "w+")
     new_file.write(str(data))
     new_file.close()
     
     
-    new_file1 = open('/home/pi/Documents/STN_Server/python/calstatus.txt', "w+")
+    new_file1 = open(f_path + 'calstatus.txt', "w+")
     new_file1.write(datetime.today().strftime('%d/%m/%Y'))
     new_file1.close()
 
@@ -51,7 +54,7 @@ def check_cal_already_saved(device):
         device.write('*OPC')
         time.sleep(1)
         device.query_binary_values(':MMEMory:DATA? "%s"' % ('Pi.sta'),'B',False)
-        new_file1 = open('/home/pi/Documents/STN_Server/python/calstatus.txt', "r")
+        new_file1 = open(f_path + 'calstatus.txt', "r")
         print(new_file1.read())
         new_file1.close()
     except:
@@ -59,15 +62,16 @@ def check_cal_already_saved(device):
     
 def extract_data(device):
     try:
-        #device.write(':MMEMory:LOAD:STATe "%s"' % ('CEXP3.sta'))
-        #device.write('*OPC')
+        device.write(':MMEMory:LOAD:STATe "%s"' % ('Pi.sta'))
+        device.write(':INITiate:CONTinuous %d' % (1))
+        device.write('*OPC')
         time.sleep(1)
         device.write(':MMEMory:STORe:FDATA "%s"' % ('Pi.csv'))
         device.write('*OPC')
         time.sleep(1)
         filedata = device.query_binary_values(':MMEMory:DATA? "%s"' % ('Pi.csv'))
         
-        new_file = open('/home/pi/Documents/STN_Server/python/Pi.csv', 'wb')
+        new_file = open(f_path + 'Pi.csv', 'wb')
         for fl in filedata:
             new_file.write(bytearray(struct.pack('f', fl)))    
             
@@ -79,14 +83,16 @@ def extract_data(device):
         print('5.0')
         
 def extract_data_corr(device, torre, estai, i):
-        
+        device.write(':MMEMory:LOAD:STATe "%s"' % ('Pi.sta'))
+        device.write(':INITiate:CONTinuous %d' % (1))
+        device.write('*OPC')
         time.sleep(1)
         device.write(':MMEMory:STORe:FDATA "%s"' % ('Pi2.csv'))
         device.write('*OPC')
         time.sleep(1)
         filedata = device.query_binary_values(':MMEMory:DATA? "%s"' % ('Pi2.csv'))
         
-        new_file = open('/home/pi/Documents/STN_Server/python/Pi'+ str(i) +'.csv', 'wb')
+        new_file = open(f_path + 'Pi'+ str(i) +'.csv', 'wb')
         for fl in filedata:
             new_file.write(bytearray(struct.pack('f', fl)))    
         
@@ -184,8 +190,8 @@ def normalize_csv(filename,param1, param2):
 
 def main_convert_to_xlsx(index1):
     #pdb.set_trace()
-    xlsx_default = r'/home/pi/Documents/STN_Server/python/Pi.xlsx'
-    xlsx_name = r'/home/pi/Documents/STN_Server/python/Pi'+ str(index1) +'.xlsx'
+    xlsx_default = r_path + r'Pi.xlsx'
+    xlsx_name = r_path + r'Pi'+ str(index1) +'.xlsx'
     if os.path.isfile(xlsx_name) == True:
         os.remove(xlsx_name)
     if os.path.isfile(xlsx_default) == True:
@@ -201,7 +207,7 @@ def main_convert_to_xlsx(index1):
     data_format = wb.add_format()
     data_format.set_align('center')
     #data_format.set_num_format('#0.#####0')
-    path1 = r'/home/pi/Documents/STN_Server/python/Pi' + str(index1) + '.csv'
+    path1 = r_path + r'Pi' + str(index1) + '.csv'
     #path1 = r'/media/pi/My Passport/Hastes/' + haste + '/' + 'Med' + str(index1) + '_' + haste + '.csv' 
     for j in range(1,2):
         #S11
@@ -249,8 +255,8 @@ def main_convert_to_xlsx(index1):
 def main_convert_to_xlsx_(index1):
     #pdb.set_trace()
     
-    xlsx_default = r'/home/pi/Documents/STN_Server/python/Pi.xlsx'
-    xlsx_name = r'/home/pi/Documents/STN_Server/python/Pi.xlsx'
+    xlsx_default = r_path + r'Pi.xlsx'
+    xlsx_name = r_path + r'Pi.xlsx'
     if os.path.isfile(xlsx_name) == True:
         os.remove(xlsx_name)
     if os.path.isfile(xlsx_default) == True:
@@ -266,7 +272,7 @@ def main_convert_to_xlsx_(index1):
     data_format = wb.add_format()
     data_format.set_align('center')
     #data_format.set_num_format('#0.#####0')
-    path1 = r'/home/pi/Documents/STN_Server/python/Pi' + str(index1) + '.csv' 
+    path1 = r_path + r'Pi' + str(index1) + '.csv' 
     for j in range(1,2): 
         #S11
         x, y1 = normalize_csv(path1, 1, 1)
@@ -310,9 +316,9 @@ def main_convert_to_xlsx_(index1):
     wb.close()
     
 def corr_med_samples(n_samples, min_corr):
-    dataset, qde_medicoes, qde_parametros = ColetaPrimeiraMedição('/home/pi/Documents/STN_Server/python/Pi1.xlsx')  
+    dataset, qde_medicoes, qde_parametros = ColetaPrimeiraMedição(f_path + 'Pi1.xlsx')  
     for i in range(1, n_samples):                
-        dataset, qde_medicoes, qde_parametros = ColetaNovaMedição('/home/pi/Documents/STN_Server/python/Pi' + str(i+1) + '.xlsx', dataset)
+        dataset, qde_medicoes, qde_parametros = ColetaNovaMedição(f_path + 'Pi' + str(i+1) + '.xlsx', dataset)
         
             
     matrizCorr = GeraMatrizCorrelacoes(dataset, qde_medicoes)    
@@ -329,8 +335,8 @@ def corr_med_samples(n_samples, min_corr):
 
 def save_usb_corr(index1, torre, estai, corr):
     #pdb.set_trace()
-    device.write(':MMEMory:MOVE "%s","%s"' % ('Pi2.csv', '[USBDISK]:' +  torre + '_' + estai + '_' + str(index1) + '_' + str(round(corr, 2)) + '.csv'))
-    #device.write(':MMEMory:MOVE "%s"' % ('Pi'+ str(index1) + '.csv','[USBDISK]:' + torre + '_' + estai + '_' + str(index1) + '_' + str(round(corr, 2)) + '.csv'))
+    #device.write(':MMEMory:MOVE "%s","%s"' % ('Pi2.csv', '[USBDISK]:' +  torre + '_' + estai + '_' + str(index1) + '_' + str(round(corr, 2)) + '.csv'))
+    device.write(':MMEMory:MOVE "%s","%s"' % ('Pi2.csv', '[INTERNAL]:' +  torre + '_' + estai + '_' + str(index1) + '_' + str(round(corr, 2)) + '.csv'))
 
 def check_corr(n_samples, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, corr, torre, estai, index1):
     if qdeMedValidas < n_samples and qdeMedRealizadas < qdeMaximaMedicoes:
@@ -344,9 +350,9 @@ def check_corr(n_samples, qdeMedValidas, qdeMedRealizadas, qdeMaximaMedicoes, co
         #save_usb_corr(index1, torre, estai, corr)
 
 def corr_med_other_samples(index1, min_corr):
-    dataset, qde_medicoes, qde_parametros = ColetaPrimeiraMedição('/home/pi/Documents/STN_Server/python/Pi1.xlsx')  
+    dataset, qde_medicoes, qde_parametros = ColetaPrimeiraMedição(f_path + 'Pi1.xlsx')  
     for i in range(1, index1):                
-        dataset, qde_medicoes, qde_parametros = ColetaNovaMedição('/home/pi/Documents/STN_Server/python/Pi' + str(i+1) + '.xlsx', dataset)
+        dataset, qde_medicoes, qde_parametros = ColetaNovaMedição(f_path + 'Pi' + str(i+1) + '.xlsx', dataset)
     
    
     qdeMedRealizadas = index1

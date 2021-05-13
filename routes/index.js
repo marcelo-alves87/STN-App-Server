@@ -7,13 +7,12 @@ var exec = require("child_process").exec;
 const UPLOAD_PATH = '../python/';
 var uuid = require('uuid')
 
-
+var path_python = ' /home/pi/Documents/STN_Server_branch/STN-App-Server/python/' 
 
 router.post('/checkConnectionAndCalibrationStatus', function(req,res){
     /*
     0 - Sem conexao, 1 - Sem calibracao, 2 - Calibracao encontrada, e retornar a data da calibracao
     */
-    
    checkConnection(res);
 
    
@@ -33,7 +32,7 @@ router.post('/checkConnectionAndCalibrationStatus', function(req,res){
 function checkConnection(res) {
 
 
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckConnection.py', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckConnection.py', (error, stdout, stderr) => {
         if (error) {
           console.error(error);
         } 
@@ -54,7 +53,7 @@ function checkConnection(res) {
 }
 
 router.post('/checkCalAlreadySaved', function(req, res) {
-     exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py "0.1"', (error, stdout, stderr) => {
+     exec('python3' + path_python + 'CheckCalibrationStatus.py "0.1"', (error, stdout, stderr) => {
             if (error) {
               console.error(error);
             } 
@@ -78,7 +77,7 @@ router.post('/startNewCalibration', function(req, res) {
 });
 
 function startNewCalibration(res) {
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 0', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckCalibrationStatus.py 0', (error, stdout, stderr) => {
         if (error) {
           console.error(error);
         } 
@@ -97,7 +96,7 @@ function startNewCalibration(res) {
 }
 
 router.post('/openCalibrationStatus', function(req,res){
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 1', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckCalibrationStatus.py 1', (error, stdout, stderr) => {
         if (error) {
           console.error(error);
         } 
@@ -116,7 +115,7 @@ router.post('/openCalibrationStatus', function(req,res){
 });
 
 router.post('/shortCalibrationStatus', function(req,res){
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 2', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckCalibrationStatus.py 2', (error, stdout, stderr) => {
         if (error) {
           console.error(error);
         } 
@@ -135,7 +134,7 @@ router.post('/shortCalibrationStatus', function(req,res){
 });
 
 router.post('/loadCalibrationStatus', function(req,res){
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 3', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckCalibrationStatus.py 3', (error, stdout, stderr) => {
         if (error) {
           console.error(error);
         } 
@@ -155,7 +154,7 @@ router.post('/loadCalibrationStatus', function(req,res){
 
 
 router.post('/saveCalibrationStatus', function(req,res){
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 4', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckCalibrationStatus.py 4', (error, stdout, stderr) => {
         if (error) {
           console.error(error);
         } 
@@ -219,7 +218,7 @@ router.post('/fileProcess', function(req,res) {
 
 function extractDataFromVNA(data, res) {
 
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 5', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckCalibrationStatus.py 5', (error, stdout, stderr) => {
         if (error) {
           console.log('Erro:')
           console.error(error);
@@ -236,7 +235,7 @@ function extractDataFromVNA(data, res) {
 
 function convertDataToXlsx(res) {
 
-    exec('python3 /home/pi/Documents/STN_Server/python/ConvertToModel.py', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'ConvertToModel.py', (error, stdout, stderr) => {
         if (error) {
           console.log('Erro:')
           console.error(error);
@@ -254,7 +253,7 @@ function convertDataToXlsx(res) {
 
 function execPython_RNN(res) {
     
-    exec('python3 /home/pi/Documents/STN_Server/python/Workshop.py', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'Workshop.py', (error, stdout, stderr) => {
         if (error) {
           console.log('Erro:')
           console.error(error);
@@ -278,7 +277,7 @@ function execPython_RNN(res) {
 }
 
 function getMeanMode(input1, res) {
-    exec('python3 /home/pi/Documents/STN_Server/python/GetMeanMode.py ' + input1, (error, stdout, stderr) => {
+    exec('python3' + path_python + 'GetMeanMode.py ' + input1, (error, stdout, stderr) => {
         if (error) {
           console.log('Erro:')
           console.error(error);
@@ -297,7 +296,7 @@ function getMeanMode(input1, res) {
 
 router.post('/shutdown', function(req, res) {
 
-    exec('python3 /home/pi/Documents/STN_Server/python/Shutdown.py', (error, stdout, stderr) => {
+    exec('python3' + path_python + 'Shutdown.py', (error, stdout, stderr) => {
         if (error) {
           console.error(error);
         } else if(stderr) {
@@ -338,7 +337,7 @@ router.post('/startMeasurement', function(req, res) {
 
 function extractDataFromVNA_Corr(input_argv, res) {
 
-    exec('python3 /home/pi/Documents/STN_Server/python/CheckCalibrationStatus.py 6 ' + input_argv, (error, stdout, stderr) => {
+    exec('python3' + path_python + 'CheckCalibrationStatus.py 6 ' + input_argv, (error, stdout, stderr) => {
         if (error) {
           console.log('Erro:');
           console.error(error);
